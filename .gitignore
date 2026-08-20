@@ -1,0 +1,31 @@
+## Build
+bin/
+obj/
+Build/
+*.user
+*.suo
+.vs/
+*.qlplugin
+*.zip
+*.7z
+
+## Packages
+packages/
+*.nupkg
+*.snupkg
+QuickLook.Common/
+QuickLook/
+
+## OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+## Temp
+C:\Users\USER\AppData\Local\Temp\QuickLook
+C:\Users\USER\AppData\Local\Temp\VersOneExtract
+C:\Users\USER\AppData\Local\Temp\EpubViewer
+C:\Users\USER\AppData\Local\Temp\QuickLook
+
+# MSBuild
+*.log

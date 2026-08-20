@@ -1,0 +1,87 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>QuickLook.Plugin.EpubViewer2</RootNamespace>
+    <AssemblyName>QuickLook.Plugin.EpubViewer2</AssemblyName>
+    <OutputType>library</OutputType>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <LangVersion>latest</LangVersion>
+    <FileAlignment>512</FileAlignment>
+    <SignAssembly>false</SignAssembly>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Platforms>AnyCPU;x64;ARM64</Platforms>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <!-- QuickLook 빌드 트리 내부에서 빌드될 때 출력 경로 (HtmlViewer 등과 동일) -->
+  <PropertyGroup Condition="Exists('..\..\Build')">
+    <OutputPath Condition="'$(Configuration)' == 'Debug'">..\..\Build\Debug\QuickLook.Plugin\QuickLook.Plugin.EpubViewer2\</OutputPath>
+    <OutputPath Condition="'$(Configuration)' == 'Release'">..\..\Build\Release\QuickLook.Plugin\QuickLook.Plugin.EpubViewer2\</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
+    <PackageReference Include="VersOne.Epub" Version="3.3.6" />
+  </ItemGroup>
+
+  <!-- Standalone 빌드: NuGet QuickLook.Common 사용 (런타임은 QuickLook 호스트가 제공하므로 복사 제외) -->
+  <ItemGroup Condition="!Exists('QuickLook.Common\QuickLook.Common.csproj') and !Exists('..\..\QuickLook.Common\QuickLook.Common.csproj') and !Exists('..\..\QuickLook\QuickLook.Common\QuickLook.Common.csproj')">
+    <PackageReference Include="QuickLook.Common" Version="4.5.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <!-- Submodule / 로컬 QuickLook 소스와 함께 빌드 -->
+  <ItemGroup Condition="Exists('QuickLook.Common\QuickLook.Common.csproj')">
+    <ProjectReference Include="QuickLook.Common\QuickLook.Common.csproj" Private="False" />
+  </ItemGroup>
+  <ItemGroup Condition="Exists('..\..\QuickLook.Common\QuickLook.Common.csproj')">
+    <ProjectReference Include="..\..\QuickLook.Common\QuickLook.Common.csproj" Private="False" />
+  </ItemGroup>
+  <ItemGroup Condition="Exists('..\..\QuickLook\QuickLook.Common\QuickLook.Common.csproj')">
+    <ProjectReference Include="..\..\QuickLook\QuickLook.Common\QuickLook.Common.csproj" Private="False" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Translations.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="QuickLook.Plugin.Metadata.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

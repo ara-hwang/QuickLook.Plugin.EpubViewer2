@@ -1,0 +1,4 @@
+[submodule "QuickLook.Plugin.EpubViewer2/QuickLook.Common"]
+	path = QuickLook.Plugin.EpubViewer2/QuickLook.Common
+	url = https://github.com/QL-Win/QuickLook.git
+	branch = master
