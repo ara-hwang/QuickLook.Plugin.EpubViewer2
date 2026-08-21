@@ -9,6 +9,12 @@
 
 이 플러그인은 [QL-Win/QuickLook.Plugin.EpubViewer](https://github.com/QL-Win/QuickLook.Plugin.EpubViewer)를 기반으로 제작되었습니다.
 
+## 스크린샷
+
+![Accessible EPUB 3 미리보기](assets/screenshot.png)
+
+> 샘플 EPUB: [Accessible EPUB 3](https://idpf.github.io/epub3-samples/30/samples.html) — Matt Garrish, O'Reilly (IDPF EPUB 3 Samples)
+
 ## 설치
 
 1. [`QuickLook.Plugin.EpubViewer2.qlplugin` 다운로드](https://github.com/ara-hwang/QuickLook.Plugin.EpubViewer2/releases)
