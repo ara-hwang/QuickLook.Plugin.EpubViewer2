@@ -717,14 +717,10 @@ window.addEventListener('click', function(e){
                 return;
             }
 
-            // Html 파일
+            // Html 파일 - 가독성을 위한 좌우 여백 주입
             if (_book.Content.Html.TryGetLocalFileByFilePath(internalPath, out var htmlFile))
             {
-                // 원본 html 그대로 반환 (필요 시 주입 가능)
-                // 다크모드 배경 보정: html에 <body>가 있으면 스타일 주입
-                string content = htmlFile.Content;
-                // 간단한 다크모드 대응: QuickLook 다크 테마면 배경 어둡게 (선택)
-                // 여기서는 원본 유지
+                string content = InjectReadingStyle(htmlFile.Content);
                 var bytes = Encoding.UTF8.GetBytes(content);
                 var stream = new MemoryStream(bytes);
                 args.Response = _webView.CoreWebView2.Environment.CreateWebResourceResponse(
@@ -777,8 +773,9 @@ window.addEventListener('click', function(e){
                 }
                 else if (anyFile is EpubLocalTextContentFile textFile)
                 {
-                    var bytes = Encoding.UTF8.GetBytes(textFile.Content);
                     var mime = GetMimeType(Path.GetExtension(internalPath));
+                    string textContent = mime == "text/html" ? InjectReadingStyle(textFile.Content) : textFile.Content;
+                    var bytes = Encoding.UTF8.GetBytes(textContent);
                     var stream = new MemoryStream(bytes);
                     args.Response = _webView.CoreWebView2.Environment.CreateWebResourceResponse(
                         stream, 200, "OK", $"Content-Type: {mime}; charset=utf-8");
@@ -799,7 +796,10 @@ window.addEventListener('click', function(e){
             }
             if (matchingFile is EpubLocalTextContentFile matchingTextFile)
             {
-                var stream = new MemoryStream(Encoding.UTF8.GetBytes(matchingTextFile.Content));
+                string matchingContent = matchingTextFile.Content;
+                if (GetMimeType(Path.GetExtension(internalPath)) == "text/html")
+                    matchingContent = InjectReadingStyle(matchingContent);
+                var stream = new MemoryStream(Encoding.UTF8.GetBytes(matchingContent));
                 string mime = GetMimeType(Path.GetExtension(internalPath));
                 string headers = mime == "text/html" ? GetHtmlResponseHeaders() : $"Content-Type: {mime}; charset=utf-8";
                 args.Response = _webView.CoreWebView2.Environment.CreateWebResourceResponse(stream, 200, "OK", headers);
@@ -824,6 +824,41 @@ window.addEventListener('click', function(e){
         return $"Content-Type: text/html; charset=utf-8\r\n" +
                $"Content-Security-Policy: {contentSecurityPolicy}\r\n" +
                "X-Content-Type-Options: nosniff";
+    }
+
+    private static string InjectReadingStyle(string html)
+    {
+        if (string.IsNullOrEmpty(html))
+            return html;
+
+        // 이미 주입된 경우 중복 방지
+        if (html.IndexOf("quicklook-epub-margin", StringComparison.OrdinalIgnoreCase) >= 0)
+            return html;
+
+        const string style = "<style id=\"quicklook-epub-margin\">html{background:#fff}body{padding:20px 24px !important;max-width:780px !important;margin:0 auto !important;box-sizing:border-box !important;overflow-wrap:break-word !important;word-break:break-word !important}img,svg,video{max-width:100% !important;height:auto !important}pre{white-space:pre-wrap !important;word-break:break-word !important}@media(max-width:600px){body{padding:14px 16px !important}}</style>";
+
+        int idx = html.IndexOf("</head>", StringComparison.OrdinalIgnoreCase);
+        if (idx >= 0)
+            return html.Insert(idx, style);
+
+        idx = html.IndexOf("<head", StringComparison.OrdinalIgnoreCase);
+        if (idx >= 0)
+        {
+            int end = html.IndexOf('>', idx);
+            if (end >= 0)
+                return html.Insert(end + 1, style);
+        }
+
+        idx = html.IndexOf("<html", StringComparison.OrdinalIgnoreCase);
+        if (idx >= 0)
+        {
+            int end = html.IndexOf('>', idx);
+            if (end >= 0)
+                return html.Insert(end + 1, "<head>" + style + "</head>");
+        }
+
+        // head/html 태그가 없는 비정형 문서
+        return style + html;
     }
 
     private string GenerateCoverHtml()
